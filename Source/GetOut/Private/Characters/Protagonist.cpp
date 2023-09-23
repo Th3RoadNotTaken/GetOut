@@ -8,6 +8,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
+#include "Interfaces/Interact.h"
 
 AProtagonist::AProtagonist()
 {
@@ -47,7 +50,8 @@ void AProtagonist::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AProtagonist::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AProtagonist::Look);
-		EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &AProtagonist::UpdateFlashlightState);
+		EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &AProtagonist::FlashlightKeyPressed);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AProtagonist::InteractKeyPressed);
 	}
 }
 
@@ -71,8 +75,44 @@ void AProtagonist::Look(const FInputActionValue& Value)
 	AddControllerPitchInput(LookVector.Y);
 }
 
+void AProtagonist::InteractKeyPressed()
+{
+	TArray<AActor*> OverlappingActors;
+	GetOverlappingActors(
+		OverlappingActors
+	);
+	if (OverlappingActors.Num() == 0)return;
+
+	for (auto Actor : OverlappingActors)
+	{
+		if (Actor)
+		{
+			IInteract* InteractInterface = Cast<IInteract>(Actor);
+			if (InteractInterface)
+			{
+				InteractInterface->InteractWithObject();
+			}
+		}
+	}
+}
+
+void AProtagonist::FlashlightKeyPressed()
+{
+	if (bFlashlightTimerFinished)
+	{
+		bFlashlightTimerFinished = false;
+		GetWorldTimerManager().SetTimer(
+			FlashlightTimerHandle,
+			this,
+			&AProtagonist::UpdateFlashlightState,
+			FlashlightSwitchDelay
+		);
+	}
+}
+
 void AProtagonist::UpdateFlashlightState()
 {
+	bFlashlightTimerFinished = true;
 	if (!bIsFlashlightOn)
 	{
 		Flashlight->SetVisibility(true);
@@ -82,5 +122,13 @@ void AProtagonist::UpdateFlashlightState()
 	{
 		Flashlight->SetVisibility(false);
 		bIsFlashlightOn = false;
+	}
+
+	if (FlashlightClickSound)
+	{
+		UGameplayStatics::PlaySound2D(
+			this,
+			FlashlightClickSound
+		);
 	}
 }

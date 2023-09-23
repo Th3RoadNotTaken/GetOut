@@ -21,10 +21,12 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Character Components")
 	class USpotLightComponent* Flashlight;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Character Components")
 	class UCameraComponent* Camera;
+	UPROPERTY(EditAnywhere, Category = "Character Components")
+	class USoundCue* FlashlightClickSound;
 
 	/**
 	* Input
@@ -37,12 +39,20 @@ private:
 	UInputAction* LookAction;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* FlashlightAction;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* InteractAction;
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void InteractKeyPressed();
+	void FlashlightKeyPressed();
 	void UpdateFlashlightState();
+	bool bFlashlightTimerFinished = true;
 	bool bIsFlashlightOn = false;
+	UPROPERTY(EditAnywhere, Category = "Character Components")
+	float FlashlightSwitchDelay = 0.3f;
+	FTimerHandle FlashlightTimerHandle;
 
 public:	
-
+	
 };
