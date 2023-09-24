@@ -7,6 +7,8 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/WidgetComponent.h"
+#include "HUD/InteractWidget.h"
 
 AHidingSpot::AHidingSpot()
 {
@@ -29,16 +31,58 @@ AHidingSpot::AHidingSpot()
 
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Trigger Box"));
 	TriggerBox->SetupAttachment(GetRootComponent());
+
+	InteractionWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Interaction Widget Component"));
+	InteractionWidgetComponent->SetupAttachment(GetRootComponent());
 }
 
 void AHidingSpot::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnOverlapBegin);
+	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &ThisClass::OnOverlapEnd);
+
+	if (InteractionWidgetComponent)
+	{
+		InteractionWidgetComponent->SetVisibility(false);
+		UUserWidget* Widget = InteractionWidgetComponent->GetWidget();
+		if (Widget)
+		{
+			InteractWidget = Cast<UInteractWidget>(Widget);
+		}
+	}
 }
 
 void AHidingSpot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AHidingSpot::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (InteractionWidgetComponent == nullptr || InteractWidget == nullptr)
+		return;
+
+	FString HidingText;
+	if (!bIsHiding)
+	{
+		HidingText = "Press E To Hide";
+	}
+	else
+	{
+		HidingText = "Press E To Get Out";
+	}
+	InteractWidget->UpdateInteractionText(HidingText);
+	InteractionWidgetComponent->SetVisibility(true);
+}
+
+void AHidingSpot::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (InteractionWidgetComponent)
+	{
+		InteractionWidgetComponent->SetVisibility(false);
+	}
 }
 
 void AHidingSpot::InteractWithObject()
