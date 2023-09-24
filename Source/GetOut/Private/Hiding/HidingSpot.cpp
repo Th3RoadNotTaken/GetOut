@@ -9,6 +9,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "HUD/InteractWidget.h"
+#include "Sound/SoundAttenuation.h"
+#include "Sound/SoundCue.h"
 
 AHidingSpot::AHidingSpot()
 {
@@ -96,12 +98,30 @@ void AHidingSpot::InteractWithObject()
 			Character->SetActorTransform(InsideRef->GetComponentTransform());
 			Door->SetRelativeRotation(FRotator(0.f));
 			bIsHiding = true;
+			PlayInteractSound(EnterSound);
 		}
 		else
 		{
 			Character->SetActorTransform(OutsideRef->GetComponentTransform());
 			Door->SetRelativeRotation(FRotator(0.f, 120.f, 0.f));
 			bIsHiding = false;
+			PlayInteractSound(ExitSound);
 		}
+	}
+}
+
+void AHidingSpot::PlayInteractSound(USoundCue* Sound)
+{
+	if (Sound && InteractAttenuation)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			Sound,
+			GetActorLocation(),
+			1.f,
+			1.f,
+			0.f,
+			InteractAttenuation
+		);
 	}
 }

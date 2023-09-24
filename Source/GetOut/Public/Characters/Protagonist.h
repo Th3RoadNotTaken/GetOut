@@ -19,14 +19,22 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
 private:
+	UPROPERTY()
+	class AProtagonistHUD* ProtagonistHUD;
 	UPROPERTY(VisibleAnywhere, Category = "Character Components")
 	class USpotLightComponent* Flashlight;
 	UPROPERTY(VisibleAnywhere, Category = "Character Components")
 	class UCameraComponent* Camera;
 	UPROPERTY(EditAnywhere, Category = "Character Components")
 	class USoundCue* FlashlightClickSound;
+	UPROPERTY(EditAnywhere, Category = "Character Components")
+	USoundCue* StartGameSound;
+	UPROPERTY(EditAnywhere, Category = "Character Components")
+	USoundCue* JumpScareSound;
 
 	/**
 	* Input

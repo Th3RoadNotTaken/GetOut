@@ -19,6 +19,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds);
 
 private:
+	UPROPERTY()
 	class AProtagonist* ProtagonistCharacter;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float Speed;

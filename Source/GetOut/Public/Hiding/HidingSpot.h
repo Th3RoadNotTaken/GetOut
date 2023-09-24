@@ -51,6 +51,15 @@ private:
 	UPROPERTY()
 	class UInteractWidget* InteractWidget;
 
+	UPROPERTY(EditAnywhere, Category = "Sounds")
+	class USoundCue* EnterSound;
+	UPROPERTY(EditAnywhere, Category = "Sounds")
+	class USoundCue* ExitSound;
+	UPROPERTY(EditAnywhere, Category = "Sounds")
+	class USoundAttenuation* InteractAttenuation;
+
+	void PlayInteractSound(USoundCue* Sound);
+
 public:	
 
 };

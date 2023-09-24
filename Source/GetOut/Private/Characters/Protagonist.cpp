@@ -11,6 +11,8 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Interfaces/Interact.h"
+#include "HUD/ProtagonistHUD.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AProtagonist::AProtagonist()
 {
@@ -34,6 +36,19 @@ void AProtagonist::BeginPlay()
 			EnhancedInputSubsystem->AddMappingContext(ProtagonistMappingContext, 0);
 		}
 	}
+	Tags.Add(FName("Player"));
+	ProtagonistHUD = ProtagonistHUD == nullptr ? Cast<AProtagonistHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD()) : ProtagonistHUD;
+	if (ProtagonistHUD)
+	{
+		ProtagonistHUD->AddFadeWidget();
+		ProtagonistHUD->PlayFadeAnimation(true);
+	}
+	if (StartGameSound)
+	{
+		UGameplayStatics::PlaySound2D(this, StartGameSound);
+	}
+
+	OnTakeAnyDamage.AddDynamic(this, &ThisClass::ReceiveDamage);
 }
 
 void AProtagonist::Tick(float DeltaTime)
@@ -131,4 +146,25 @@ void AProtagonist::UpdateFlashlightState()
 			FlashlightClickSound
 		);
 	}
+}
+
+void AProtagonist::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+{
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+
+	if (ProtagonistHUD)
+	{
+		ProtagonistHUD->PlayFadeAnimation(false);
+	}
+	if (JumpScareSound)
+	{
+		UGameplayStatics::PlaySound2D(this, JumpScareSound);
+	}
+
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+		{
+			UGameplayStatics::OpenLevel(this, FName("Testing"));
+		}, 1.f, false);
 }

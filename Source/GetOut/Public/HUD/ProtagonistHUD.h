@@ -15,5 +15,14 @@ class GETOUT_API AProtagonistHUD : public AHUD
 	GENERATED_BODY()
 
 public:
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UUserWidget> FadeWidgetClass;
+
+	UPROPERTY()
+	class UFadeWidget* FadeWidget;
+
+	void AddFadeWidget();
+	void PlayFadeAnimation(bool bFadeIn);
 	
 };
