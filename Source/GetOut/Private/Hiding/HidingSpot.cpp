@@ -63,7 +63,7 @@ void AHidingSpot::Tick(float DeltaTime)
 
 void AHidingSpot::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (InteractionWidgetComponent == nullptr || InteractWidget == nullptr)
+	if (InteractionWidgetComponent == nullptr || InteractWidget == nullptr || OtherActor!=UGameplayStatics::GetPlayerCharacter(this,0))
 		return;
 
 	FString HidingText;

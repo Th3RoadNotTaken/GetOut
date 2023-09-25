@@ -28,6 +28,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Character Components")
 	class USpotLightComponent* Flashlight;
 	UPROPERTY(VisibleAnywhere, Category = "Character Components")
+	class USpringArmComponent* FollowCamera;
+	UPROPERTY(VisibleAnywhere, Category = "Character Components")
 	class UCameraComponent* Camera;
 	UPROPERTY(EditAnywhere, Category = "Character Components")
 	class USoundCue* FlashlightClickSound;
@@ -35,6 +37,8 @@ private:
 	USoundCue* StartGameSound;
 	UPROPERTY(EditAnywhere, Category = "Character Components")
 	USoundCue* JumpScareSound;
+	UPROPERTY(EditAnywhere, Category = "Character Components")
+	USoundCue* AmbientSound;
 
 	/**
 	* Input

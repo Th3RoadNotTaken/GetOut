@@ -18,11 +18,14 @@ AProtagonist::AProtagonist()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	FollowCamera = CreateDefaultSubobject<USpringArmComponent>(TEXT("Follow Camera"));
+	FollowCamera->SetupAttachment(GetMesh(), FName("Head"));
+
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(GetMesh(), FName("Head"));
+	Camera->SetupAttachment(FollowCamera, USpringArmComponent::SocketName);
 
 	Flashlight = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
-	Flashlight->SetupAttachment(Camera);
+	Flashlight->SetupAttachment(FollowCamera);
 	Flashlight->SetVisibility(false);
 }
 
@@ -46,6 +49,10 @@ void AProtagonist::BeginPlay()
 	if (StartGameSound)
 	{
 		UGameplayStatics::PlaySound2D(this, StartGameSound);
+	}
+	if (AmbientSound)
+	{
+		UGameplayStatics::PlaySound2D(this, AmbientSound);
 	}
 
 	OnTakeAnyDamage.AddDynamic(this, &ThisClass::ReceiveDamage);
@@ -166,5 +173,5 @@ void AProtagonist::ReceiveDamage(AActor* DamagedActor, float Damage, const UDama
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
 		{
 			UGameplayStatics::OpenLevel(this, FName("Testing"));
-		}, 1.f, false);
+		}, 1.5f, false);
 }
