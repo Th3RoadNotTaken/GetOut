@@ -74,6 +74,7 @@ void AProtagonist::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AProtagonist::Look);
 		EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &AProtagonist::FlashlightKeyPressed);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AProtagonist::InteractKeyPressed);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AProtagonist::CrouchPressed);
 	}
 }
 
@@ -95,6 +96,18 @@ void AProtagonist::Look(const FInputActionValue& Value)
 	FVector2D LookVector = Value.Get<FVector2D>();
 	AddControllerYawInput(LookVector.X);
 	AddControllerPitchInput(LookVector.Y);
+}
+
+void AProtagonist::CrouchPressed()
+{
+	if (!bIsCrouched)
+	{
+		Crouch();
+	}
+	else
+	{
+		UnCrouch();
+	}
 }
 
 void AProtagonist::InteractKeyPressed()

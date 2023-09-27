@@ -23,4 +23,6 @@ private:
 	class AProtagonist* ProtagonistCharacter;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float Speed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	bool bIsCrouched;
 };

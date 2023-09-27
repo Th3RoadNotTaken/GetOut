@@ -17,4 +17,5 @@ void UProtagonistAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		return;
 
 	Speed = ProtagonistCharacter->GetVelocity().Size();
+	bIsCrouched = ProtagonistCharacter->IsCrouching();
 }

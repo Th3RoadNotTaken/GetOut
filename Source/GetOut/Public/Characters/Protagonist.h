@@ -53,9 +53,12 @@ private:
 	UInputAction* FlashlightAction;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* InteractAction;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* CrouchAction;
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void CrouchPressed();
 	void InteractKeyPressed();
 	void FlashlightKeyPressed();
 	void UpdateFlashlightState();
@@ -66,5 +69,5 @@ private:
 	FTimerHandle FlashlightTimerHandle;
 
 public:	
-	
+	FORCEINLINE bool IsCrouching() const { return bIsCrouched; }
 };
