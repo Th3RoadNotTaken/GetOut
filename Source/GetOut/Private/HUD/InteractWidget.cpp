@@ -6,5 +6,6 @@
 
 void UInteractWidget::UpdateInteractionText(FString Text)
 {
-	InteractionText->SetText(FText::FromString(Text));
+	if(InteractionText)
+		InteractionText->SetText(FText::FromString(Text));
 }

@@ -9,9 +9,12 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Interfaces/Interact.h"
 #include "HUD/ProtagonistHUD.h"
+#include "GameModes/MansionGameMode.h"
+#include "PlayerControllers/ProtagonistPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 AProtagonist::AProtagonist()
@@ -40,9 +43,14 @@ void AProtagonist::BeginPlay()
 		}
 	}
 	Tags.Add(FName("Player"));
+
 	ProtagonistHUD = ProtagonistHUD == nullptr ? Cast<AProtagonistHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD()) : ProtagonistHUD;
+	MansionGameMode = MansionGameMode == nullptr ? Cast<AMansionGameMode>(UGameplayStatics::GetGameMode(this)) : MansionGameMode;
+	CharacterController = CharacterController == nullptr ? Cast<AProtagonistPlayerController>(Controller) : CharacterController;
+
 	if (ProtagonistHUD)
 	{
+		ProtagonistHUD->AddOverlayWidget();
 		ProtagonistHUD->AddFadeWidget();
 		ProtagonistHUD->PlayFadeAnimation(true);
 	}
@@ -52,7 +60,11 @@ void AProtagonist::BeginPlay()
 	}
 	if (AmbientSound)
 	{
-		UGameplayStatics::PlaySound2D(this, AmbientSound);
+		AmbientSoundComponent = UGameplayStatics::CreateSound2D(this, AmbientSound);
+		if (AmbientSoundComponent)
+		{
+			AmbientSoundComponent->Play();
+		}
 	}
 
 	OnTakeAnyDamage.AddDynamic(this, &ThisClass::ReceiveDamage);
@@ -172,6 +184,10 @@ void AProtagonist::ReceiveDamage(AActor* DamagedActor, float Damage, const UDama
 {
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
+	if (AmbientSoundComponent)
+	{
+		AmbientSoundComponent->DestroyComponent();
+	}
 
 	if (ProtagonistHUD)
 	{
@@ -182,9 +198,15 @@ void AProtagonist::ReceiveDamage(AActor* DamagedActor, float Damage, const UDama
 		UGameplayStatics::PlaySound2D(this, JumpScareSound);
 	}
 
+	MansionGameMode = MansionGameMode == nullptr ? Cast<AMansionGameMode>(UGameplayStatics::GetGameMode(this)) : MansionGameMode;
+	CharacterController = CharacterController == nullptr ? Cast<AProtagonistPlayerController>(Controller) : CharacterController;
+
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
-		{
-			UGameplayStatics::OpenLevel(this, FName("Testing"));
-		}, 1.5f, false);
+	if (MansionGameMode && CharacterController)
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+			{
+				MansionGameMode->UpdateGameState(CharacterController, this);
+			}, 2.f, false);
+	}
 }

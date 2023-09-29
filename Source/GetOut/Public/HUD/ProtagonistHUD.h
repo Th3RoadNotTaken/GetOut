@@ -24,5 +24,13 @@ public:
 
 	void AddFadeWidget();
 	void PlayFadeAnimation(bool bFadeIn);
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UUserWidget> OverlayWidgetClass;
+
+	UPROPERTY()
+	class UProtagonistOverlay* OverlayWidget;
+
+	void AddOverlayWidget();
 	
 };

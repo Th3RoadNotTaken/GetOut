@@ -25,6 +25,10 @@ protected:
 private:
 	UPROPERTY()
 	class AProtagonistHUD* ProtagonistHUD;
+	UPROPERTY()
+	class AMansionGameMode* MansionGameMode;
+	UPROPERTY()
+	class AProtagonistPlayerController* CharacterController;
 	UPROPERTY(VisibleAnywhere, Category = "Character Components")
 	class USpotLightComponent* Flashlight;
 	UPROPERTY(VisibleAnywhere, Category = "Character Components")
@@ -39,6 +43,8 @@ private:
 	USoundCue* JumpScareSound;
 	UPROPERTY(EditAnywhere, Category = "Character Components")
 	USoundCue* AmbientSound;
+	UPROPERTY()
+	UAudioComponent* AmbientSoundComponent;
 
 	/**
 	* Input

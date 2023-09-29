@@ -3,9 +3,11 @@
 
 #include "HUD/ProtagonistHUD.h"
 #include "HUD/FadeWidget.h"
+#include "HUD/ProtagonistOverlay.h"
 
 void AProtagonistHUD::AddFadeWidget()
 {
+	if (FadeWidget)return;
 	APlayerController* PlayerController = GetOwningPlayerController();
 	if (PlayerController && FadeWidgetClass)
 	{
@@ -22,5 +24,16 @@ void AProtagonistHUD::PlayFadeAnimation(bool bFadeIn)
 			FadeWidget->PlayAnimation(FadeWidget->FadeIn);
 		else
 			FadeWidget->PlayAnimationReverse(FadeWidget->FadeIn);
+	}
+}
+
+void AProtagonistHUD::AddOverlayWidget()
+{
+	if (OverlayWidget)return;
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && OverlayWidgetClass)
+	{
+		OverlayWidget = CreateWidget<UProtagonistOverlay>(PlayerController, OverlayWidgetClass);
+		OverlayWidget->AddToViewport(0);
 	}
 }

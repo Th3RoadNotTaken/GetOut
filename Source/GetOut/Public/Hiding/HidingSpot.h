@@ -45,9 +45,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Widgets")
 	class UWidgetComponent* InteractionWidgetComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Widgets")
-	class AProtagonistHUD* CharacterHUD;
-
 	UPROPERTY()
 	class UInteractWidget* InteractWidget;
 
