@@ -18,6 +18,7 @@ public:
 	void UpdateGameState(class AProtagonistPlayerController* PlayerController, class AProtagonist* ProtagonistCharacter);
 	void ReduceKeysLeft();
 	virtual void Tick(float DeltaTime) override;
+	void SetLastCheckpoint(FTransform CheckpointTransform);
 
 protected:
 	virtual void BeginPlay() override;
@@ -32,10 +33,12 @@ private:
 	
 	float GameTime = 0.f;
 
+	UPROPERTY(VisibleAnywhere)
+	FTransform LastCheckpointTransform;
+	bool bHasNoCheckpoints = true;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Game Rules")
 	TSubclassOf<class AProtagonist> ProtagonistCharacterClass;
-	UPROPERTY()
-	class APickup* LastCheckpoint;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game Rules")
 	TSubclassOf<class AActor> CharacterPlayerStartClass;

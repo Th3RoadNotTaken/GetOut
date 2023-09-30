@@ -89,17 +89,16 @@ void APickup::InteractWithObject()
 {
 	PlayerController = PlayerController == nullptr ? Cast<AProtagonistPlayerController>(UGameplayStatics::GetPlayerController(this, 0)) : PlayerController;
 	MansionGameMode = MansionGameMode == nullptr ? Cast<AMansionGameMode>(UGameplayStatics::GetGameMode(this)) : MansionGameMode;
-	if (PlayerController == nullptr || MansionGameMode == nullptr)return;
+	if (PlayerController == nullptr || MansionGameMode == nullptr || RefMesh == nullptr)return;
 
-	if (PlayerController)
+	MansionGameMode->ReduceKeysLeft();
+	MansionGameMode->SetLastCheckpoint(RefMesh->GetComponentTransform());
+
+	PlayerController->UpdateKeys(MansionGameMode->GetKeysLeft());
+
+	if (PickupSound)
 	{
-		MansionGameMode->ReduceKeysLeft();
-		PlayerController->UpdateKeys(MansionGameMode->GetKeysLeft());
-
-		if (PickupSound)
-		{
-			UGameplayStatics::PlaySound2D(this, PickupSound);
-		}
+		UGameplayStatics::PlaySound2D(this, PickupSound);
 	}
 	Destroy();
 }

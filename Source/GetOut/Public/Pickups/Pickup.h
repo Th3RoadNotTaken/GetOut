@@ -51,5 +51,5 @@ protected:
 	class AMansionGameMode* MansionGameMode;
 
 public:	
-
+	FORCEINLINE USkeletalMeshComponent* GetRefMesh() const { return RefMesh; }
 };

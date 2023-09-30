@@ -25,20 +25,24 @@ void AMansionGameMode::UpdateGameState(AProtagonistPlayerController* PlayerContr
 {
 	if (!PlayerController || ProtagonistCharacter == nullptr || ProtagonistCharacterClass == nullptr)return;
 
-	ProtagonistCharacter->Reset();
+	AActor* LastPlayerActor = ProtagonistCharacter;
 	ProtagonistCharacter->Destroy();
 
 	if (Lives > 1)
 	{
 		PlayerController->UpdateLives(--Lives);
-		if (LastCheckpoint == nullptr && CharacterPlayerStartClass)
+		if (bHasNoCheckpoints == true)
 		{
-			TArray<AActor*> PlayerStarts;
-			UGameplayStatics::GetAllActorsOfClass(this, CharacterPlayerStartClass, PlayerStarts);
-			if (PlayerStarts.Num() > 0)
+			RestartPlayerAtPlayerStart(PlayerController, LastPlayerActor);
+		}
+		else
+		{
+			UWorld* World = GetWorld();
+			if (World)
 			{
-				int32 RandIndex = FMath::RandRange(0, PlayerStarts.Num() - 1);
-				RestartPlayerAtPlayerStart(PlayerController, PlayerStarts[RandIndex]);
+				FActorSpawnParameters SpawnParams;
+				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+				World->SpawnActor<AProtagonist>(ProtagonistCharacterClass, LastCheckpointTransform, SpawnParams);
 			}
 		}
 	}
@@ -51,4 +55,10 @@ void AMansionGameMode::UpdateGameState(AProtagonistPlayerController* PlayerContr
 void AMansionGameMode::ReduceKeysLeft()
 {
 	Keys = FMath::Clamp(Keys - 1, 0, MaxKeys);
+}
+
+void AMansionGameMode::SetLastCheckpoint(FTransform CheckpointTransform)
+{
+	bHasNoCheckpoints = false;
+	LastCheckpointTransform = CheckpointTransform;
 }
