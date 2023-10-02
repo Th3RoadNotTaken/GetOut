@@ -11,13 +11,18 @@
 #include "HUD/InteractWidget.h"
 #include "Sound/SoundAttenuation.h"
 #include "Sound/SoundCue.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AHidingSpot::AHidingSpot()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Component"));
+	RootComponent = SceneComponent;
+
 	DoorFrame = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Door Frame"));
-	RootComponent = DoorFrame;
+	DoorFrame->SetupAttachment(GetRootComponent());
 	Door = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Door"));
 	Door->SetupAttachment(GetRootComponent());
 
@@ -33,6 +38,9 @@ AHidingSpot::AHidingSpot()
 
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Trigger Box"));
 	TriggerBox->SetupAttachment(GetRootComponent());
+
+	GuardTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Guard Trigger Box"));
+	GuardTriggerBox->SetupAttachment(GetRootComponent());
 
 	InteractionWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Interaction Widget Component"));
 	InteractionWidgetComponent->SetupAttachment(GetRootComponent());
@@ -59,6 +67,21 @@ void AHidingSpot::BeginPlay()
 void AHidingSpot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bShouldOpenDoor)
+	{
+		FRotator DeltaRotation;
+		FRotator StartingRotation = Door->GetRelativeRotation();
+		FRotator EndingRotation = FRotator(0.f, 120.f, 0.f);
+		DeltaRotation = FMath::RInterpTo(StartingRotation, EndingRotation, DeltaTime, 2.f);
+		Door->SetRelativeRotation(DeltaRotation);
+		
+		if (DeltaRotation.Yaw >= (EndingRotation.Yaw - 10.f))
+		{
+			bShouldOpenDoor = false;
+			Door->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+	}
 }
 
 void AHidingSpot::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -66,6 +89,7 @@ void AHidingSpot::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 	if (InteractionWidgetComponent == nullptr || InteractWidget == nullptr || OtherActor!=UGameplayStatics::GetPlayerCharacter(this,0))
 		return;
 
+	bIsOverlapping = true;
 	FString HidingText;
 	if (!bIsHiding)
 	{
@@ -81,6 +105,7 @@ void AHidingSpot::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 
 void AHidingSpot::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	bIsOverlapping = false;
 	if (InteractionWidgetComponent)
 	{
 		InteractionWidgetComponent->SetVisibility(false);
@@ -89,6 +114,8 @@ void AHidingSpot::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor*
 
 void AHidingSpot::InteractWithObject()
 {
+	if (!bIsOverlapping)return;
+
 	ACharacter* Character = UGameplayStatics::GetPlayerCharacter(this, 0);
 	if (Character)
 	{
@@ -96,6 +123,8 @@ void AHidingSpot::InteractWithObject()
 		if (!bIsHiding)
 		{
 			Character->SetActorTransform(InsideRef->GetComponentTransform());
+			Character->GetCapsuleComponent()->SetCapsuleRadius(44.f);
+			Character->GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = false;
 			Door->SetRelativeRotation(FRotator(0.f));
 			bIsHiding = true;
 			PlayInteractSound(EnterSound);
@@ -103,6 +132,8 @@ void AHidingSpot::InteractWithObject()
 		else
 		{
 			Character->SetActorTransform(OutsideRef->GetComponentTransform());
+			Character->GetCapsuleComponent()->SetCapsuleRadius(65.f);
+			Character->GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 			Door->SetRelativeRotation(FRotator(0.f, 120.f, 0.f));
 			bIsHiding = false;
 			PlayInteractSound(ExitSound);
@@ -123,5 +154,14 @@ void AHidingSpot::PlayInteractSound(USoundCue* Sound)
 			0.f,
 			InteractAttenuation
 		);
+	}
+}
+
+void AHidingSpot::OpenDoor()
+{
+	if (bIsHiding)
+	{
+		bShouldOpenDoor = true;
+		Door->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }

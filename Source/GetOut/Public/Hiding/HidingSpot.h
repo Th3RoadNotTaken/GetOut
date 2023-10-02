@@ -16,6 +16,8 @@ public:
 	AHidingSpot();
 	virtual void Tick(float DeltaTime) override;
 	virtual void InteractWithObject() override;
+	UFUNCTION(BlueprintCallable)
+	void OpenDoor();
 
 protected:
 	virtual void BeginPlay() override;
@@ -25,6 +27,9 @@ protected:
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* SceneComponent;
+
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* Door;
 
@@ -39,6 +44,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UBoxComponent* TriggerBox;
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* GuardTriggerBox;
 
 	bool bIsHiding = false;
 
@@ -56,6 +63,9 @@ private:
 	class USoundAttenuation* InteractAttenuation;
 
 	void PlayInteractSound(USoundCue* Sound);
+
+	bool bIsOverlapping = false;
+	bool bShouldOpenDoor = false;
 
 public:	
 
